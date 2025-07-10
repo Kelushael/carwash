@@ -1,0 +1,28 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtualenv
+.venv/
+venv/
+ENV/
+
+# Logs / output
+*.log
+output/
+
+# Audio files
+*.wav
+*.mp3
+*.flac
+*.ogg
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Packaging
+build/
+dist/
+*.egg-info/
