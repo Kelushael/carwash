@@ -33,5 +33,17 @@ def openapi_spec():
     return send_file(Path(__file__).with_name("openapi.json"))
 
 
+@app.route("/.well-known/ai-plugin.json")
+def plugin_manifest():
+    """Serve the plugin manifest for ChatGPT."""
+    return send_file(Path(__file__).with_name("ai-plugin.json"))
+
+
+@app.route("/privacy")
+def privacy_policy():
+    """Serve the privacy policy markdown file."""
+    return send_file(Path(__file__).with_name("PRIVACY.md"))
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
