@@ -31,3 +31,16 @@ wash-mix map-lyrics --lyrics song.lrc --bpm 120 --output mapping.json
 ```
 
 The mapping JSON keys combine bar numbers and timestamps for easy reference.
+
+## API and Custom GPT
+
+You can run a small Flask server exposing these features as a ChatGPT
+plugin:
+
+```bash
+python server.py
+```
+
+The `ai-plugin.json` and `openapi.json` files describe the available
+endpoints so you can create a custom GPT that calls the `/mix` and
+`/map-lyrics` routes directly.
