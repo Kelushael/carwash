@@ -1,0 +1,6 @@
+Flask
+click
+pydub
+librosa
+pyloudnorm
+openai
