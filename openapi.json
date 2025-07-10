@@ -1,0 +1,62 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Car Wash Mixer API",
+    "version": "1.0.0",
+    "description": "API to normalize audio files and map lyrics."
+  },
+  "paths": {
+    "/mix": {
+      "post": {
+        "operationId": "mix",
+        "summary": "Normalize audio to -14 LUFS",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "input": {"type": "string", "description": "Path to input audio"},
+                  "output": {"type": "string", "description": "Output file path"},
+                  "preset": {"type": "string", "default": "car-wash"}
+                },
+                "required": ["input", "output"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {"description": "Mix completed"}
+        }
+      }
+    },
+    "/map-lyrics": {
+      "post": {
+        "operationId": "mapLyrics",
+        "summary": "Convert LRC lyrics to JSON mapping",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "lyrics": {"type": "string", "description": "Path to LRC file"},
+                  "bpm": {"type": "number"},
+                  "beats_per_bar": {"type": "integer", "default": 4},
+                  "offset": {"type": "number", "default": 0.0},
+                  "output": {"type": "string", "description": "Output JSON path"}
+                },
+                "required": ["lyrics", "bpm", "output"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {"description": "Mapping generated"}
+        }
+      }
+    }
+  }
+}

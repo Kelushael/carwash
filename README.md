@@ -31,3 +31,45 @@ wash-mix map-lyrics --lyrics song.lrc --bpm 120 --output mapping.json
 ```
 
 The mapping JSON keys combine bar numbers and timestamps for easy reference.
+
+## API and Custom GPT
+
+You can run a small Flask server exposing these features as a ChatGPT
+plugin:
+
+```bash
+python server.py
+```
+
+The `ai-plugin.json` and `openapi.json` files describe the available
+endpoints so you can create a custom GPT that calls the `/mix` and
+`/map-lyrics` routes directly.
+
+## Recursive AI Node
+
+A simple experimental server is included to demonstrate a recursive
+communication pattern. Start it with:
+
+```bash
+python recursive_ai_node.py
+```
+
+Then you can register an agent and send echo patterns using `requests`:
+
+```python
+import requests
+
+resp = requests.post("http://localhost:8000/register_agent",
+                     json={"capabilities": ["audio_generation", "pattern_recognition"]})
+agent_id = resp.json()["agent_id"]
+
+resp = requests.post("http://localhost:8000/initiate_echo",
+                     json={"agent_id": agent_id, "message": "Initial recursive pattern"})
+pattern_id = resp.json()["pattern_id"]
+
+requests.post("http://localhost:8000/continue_echo",
+              json={"pattern_id": pattern_id, "agent_id": agent_id,
+                    "message": "Continuing pattern"})
+```
+
+This service stores patterns in memory and simply echoes them back.
