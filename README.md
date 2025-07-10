@@ -44,3 +44,16 @@ python server.py
 The `ai-plugin.json` and `openapi.json` files describe the available
 endpoints so you can create a custom GPT that calls the `/mix` and
 `/map-lyrics` routes directly.
+
+Import the plugin using the following manifest URL once the server is
+running:
+
+```
+http://localhost:5000/.well-known/ai-plugin.json
+```
+
+The privacy policy can be viewed at:
+
+```
+http://localhost:5000/privacy
+```
