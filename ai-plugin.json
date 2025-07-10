@@ -1,0 +1,15 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Car Wash Mixer",
+  "name_for_model": "carwash",
+  "description_for_human": "Normalize audio and create lyric mappings.",
+  "description_for_model": "Plugin for audio normalization and lyric mapping using local file paths.",
+  "auth": {"type": "none"},
+  "api": {
+    "type": "openapi",
+    "url": "http://localhost:5000/openapi.json"
+  },
+  "logo_url": "https://example.com/logo.png",
+  "contact_email": "support@example.com",
+  "legal_info_url": "https://example.com/legal"
+}
