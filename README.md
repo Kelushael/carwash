@@ -1,6 +1,8 @@
 # Car Wash Mixer
 
-A minimal CLI for audio cleanup and lyric mapping.
+A professional audio toolkit featuring:
+- CLI for audio cleanup and lyric mapping
+- Professional AI-powered stem separator (vocals, drums, bass, instruments)
 
 ## Setup
 
@@ -31,6 +33,28 @@ wash-mix map-lyrics --lyrics song.lrc --bpm 120 --output mapping.json
 ```
 
 The mapping JSON keys combine bar numbers and timestamps for easy reference.
+
+## Professional Stem Mixer (GUI)
+
+Launch the AI-powered stem separator with a professional mixing interface:
+
+```bash
+python3 stem_mixer.py
+```
+
+Features:
+- **AI-Powered Separation**: Uses Demucs (Facebook Research) for studio-quality stem separation
+- **4-Stem Output**: Vocals, Drums, Bass, Other (guitar, piano, synths, etc.)
+- **Professional Mixer**: Individual volume controls, solo/mute buttons for each stem
+- **Real-time Preview**: Mix and preview before exporting
+- **Flexible Export**: Export individual stems or custom mixes with your settings
+
+Requirements:
+- Python 3.8+
+- FFmpeg (for audio processing)
+- At least 4GB RAM (8GB recommended for longer tracks)
+
+First-time use will download the Demucs AI model (~300MB).
 
 ## API and Custom GPT
 

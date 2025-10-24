@@ -4,3 +4,7 @@ pydub
 librosa
 pyloudnorm
 openai
+demucs
+torch
+soundfile
+numpy
