@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Wash Mixer - Professional Stem Separation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1>🎵 CAR WASH MIXER</h1>
+                <p class="tagline">Professional AI-Powered Stem Separation</p>
+            </div>
+            <div class="user-info">
+                <div class="tier-badge tier-{{ tier }}">
+                    {{ tier_info.name }}
+                </div>
+                <div class="usage-info">
+                    {% if remaining == -1 %}
+                        <span class="unlimited">∞ Unlimited</span>
+                    {% else %}
+                        <span class="count">{{ remaining }}</span> / {{ tier_info.monthly_limit }} songs left
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Upload Section -->
+            <section class="upload-section card">
+                <h2>🎶 Upload Your Track</h2>
+                <p class="section-subtitle">Separate vocals, drums, bass, and instruments with AI</p>
+
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <p class="upload-text">Drag & drop your audio file here</p>
+                    <p class="upload-subtext">or click to browse</p>
+                    <p class="upload-formats">Supported: MP3, WAV, FLAC, M4A, OGG, AAC</p>
+                    <input type="file" id="fileInput" accept=".mp3,.wav,.flac,.m4a,.ogg,.aac" hidden>
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        Select File
+                    </button>
+                </div>
+
+                <div class="selected-file" id="selectedFile" style="display: none;">
+                    <div class="file-info">
+                        <span class="file-icon">🎵</span>
+                        <span class="file-name" id="fileName"></span>
+                        <button class="btn-small btn-secondary" onclick="clearFile()">Change</button>
+                    </div>
+                    <button class="btn btn-success" id="uploadBtn" onclick="uploadFile()">
+                        🚀 Start Separation
+                    </button>
+                </div>
+
+                <div class="processing-area" id="processingArea" style="display: none;">
+                    <div class="processing-status">
+                        <div class="spinner"></div>
+                        <h3 id="statusText">Processing...</h3>
+                        <p id="statusDetail">Please wait while AI separates your track</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section card" id="resultsSection" style="display: none;">
+                <h2>✨ Separated Stems Ready!</h2>
+                <div class="stems-grid" id="stemsGrid">
+                    <!-- Stems will be populated here -->
+                </div>
+            </section>
+
+            <!-- Subscription Tiers -->
+            <section class="tiers-section">
+                <h2 class="section-title">🎯 Choose Your Plan</h2>
+                <p class="section-subtitle">Unlock more features with Pro and Premium tiers</p>
+
+                <div class="tiers-grid">
+                    {% for tier_id, tier_data in all_tiers.items() %}
+                    <div class="tier-card {% if tier == tier_id %}tier-active{% endif %}">
+                        <div class="tier-header">
+                            <h3>{{ tier_data.name }}</h3>
+                            <div class="tier-price">
+                                {% if tier_data.price == 0 %}
+                                    <span class="price">Free</span>
+                                {% else %}
+                                    <span class="price">${{ tier_data.price }}</span>
+                                    <span class="period">/month</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="tier-features">
+                            {% for feature in tier_data.features %}
+                            <div class="feature">
+                                <span class="check">✓</span>
+                                {{ feature }}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="tier-action">
+                            {% if tier == tier_id %}
+                                <button class="btn btn-current" disabled>Current Plan</button>
+                            {% elif tier_data.price == 0 %}
+                                <button class="btn btn-secondary" disabled>Free Tier</button>
+                            {% else %}
+                                <button class="btn btn-primary" onclick="upgradeTier('{{ tier_id }}')">
+                                    Upgrade to {{ tier_data.name }}
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- History Section -->
+            <section class="history-section card">
+                <h2>📜 Recent Separations</h2>
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <span class="stat-value">{{ user.total_processed }}</span>
+                        <span class="stat-label">Total Processed</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">{{ user.monthly_usage }}</span>
+                        <span class="stat-label">This Month</span>
+                    </div>
+                </div>
+                <div class="history-list" id="historyList">
+                    <p class="empty-message">No processing history yet. Upload your first track!</p>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by Demucs AI • Studio-quality stem separation</p>
+        </footer>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let currentJobId = null;
+        let statusCheckInterval = null;
+
+        // File selection handlers
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const selectedFileDiv = document.getElementById('selectedFile');
+        const fileName = document.getElementById('fileName');
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            selectedFile = file;
+            fileName.textContent = file.name;
+            uploadArea.style.display = 'none';
+            selectedFileDiv.style.display = 'block';
+        }
+
+        function clearFile() {
+            selectedFile = null;
+            fileInput.value = '';
+            uploadArea.style.display = 'block';
+            selectedFileDiv.style.display = 'none';
+        }
+
+        async function uploadFile() {
+            if (!selectedFile) return;
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            // Show processing UI
+            selectedFileDiv.style.display = 'none';
+            document.getElementById('processingArea').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    currentJobId = result.job_id;
+                    startStatusCheck();
+                } else {
+                    alert('Upload failed: ' + result.error);
+                    resetUploadUI();
+                }
+            } catch (error) {
+                alert('Upload error: ' + error.message);
+                resetUploadUI();
+            }
+        }
+
+        function startStatusCheck() {
+            statusCheckInterval = setInterval(checkStatus, 2000);
+        }
+
+        async function checkStatus() {
+            if (!currentJobId) return;
+
+            try {
+                const response = await fetch(`/status/${currentJobId}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    updateStatusUI(result.status);
+
+                    if (result.status === 'completed') {
+                        clearInterval(statusCheckInterval);
+                        showResults(result.stems);
+                    } else if (result.status === 'failed') {
+                        clearInterval(statusCheckInterval);
+                        alert('Processing failed: ' + result.error);
+                        resetUploadUI();
+                    }
+                }
+            } catch (error) {
+                console.error('Status check error:', error);
+            }
+        }
+
+        function updateStatusUI(status) {
+            const statusText = document.getElementById('statusText');
+            const statusDetail = document.getElementById('statusDetail');
+
+            const messages = {
+                'queued': {
+                    title: 'In Queue...',
+                    detail: 'Your track is waiting to be processed'
+                },
+                'processing': {
+                    title: 'AI is Working...',
+                    detail: 'Separating stems with Demucs AI (this may take 2-5 minutes)'
+                },
+                'completed': {
+                    title: 'Complete!',
+                    detail: 'Your stems are ready to download'
+                }
+            };
+
+            if (messages[status]) {
+                statusText.textContent = messages[status].title;
+                statusDetail.textContent = messages[status].detail;
+            }
+        }
+
+        function showResults(stems) {
+            document.getElementById('processingArea').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+
+            const stemsGrid = document.getElementById('stemsGrid');
+            stemsGrid.innerHTML = '';
+
+            const stemInfo = {
+                'vocals': { icon: '🎤', name: 'Vocals', color: '#ff0066' },
+                'drums': { icon: '🥁', name: 'Drums', color: '#00ff88' },
+                'bass': { icon: '🎸', name: 'Bass', color: '#ffaa00' },
+                'other': { icon: '🎹', name: 'Other', color: '#00d9ff' },
+                'instrumental': { icon: '🎵', name: 'Instrumental', color: '#00ff88' }
+            };
+
+            for (const [stemName, stemPath] of Object.entries(stems)) {
+                const info = stemInfo[stemName] || { icon: '🎵', name: stemName, color: '#666' };
+
+                const stemCard = document.createElement('div');
+                stemCard.className = 'stem-card';
+                stemCard.innerHTML = `
+                    <div class="stem-icon" style="background: ${info.color}20; color: ${info.color}">
+                        ${info.icon}
+                    </div>
+                    <h4>${info.name}</h4>
+                    <a href="/download/${currentJobId}/${stemName}" class="btn btn-download">
+                        ⬇ Download
+                    </a>
+                `;
+                stemsGrid.appendChild(stemCard);
+            }
+
+            // Reset for next upload
+            setTimeout(() => {
+                resetUploadUI();
+            }, 1000);
+
+            // Reload history
+            loadHistory();
+        }
+
+        function resetUploadUI() {
+            selectedFile = null;
+            fileInput.value = '';
+            uploadArea.style.display = 'block';
+            selectedFileDiv.style.display = 'none';
+            document.getElementById('processingArea').style.display = 'none';
+            currentJobId = null;
+        }
+
+        async function upgradeTier(tier) {
+            try {
+                const response = await fetch('/upgrade', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ tier })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+                    location.reload();
+                } else {
+                    alert('Upgrade failed: ' + result.error);
+                }
+            } catch (error) {
+                alert('Upgrade error: ' + error.message);
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const response = await fetch('/history');
+                const result = await response.json();
+
+                if (result.success && result.history.length > 0) {
+                    const historyList = document.getElementById('historyList');
+                    historyList.innerHTML = result.history.slice(-5).reverse().map(item => `
+                        <div class="history-item">
+                            <span class="history-icon">🎵</span>
+                            <span class="history-filename">${item.filename}</span>
+                            <span class="history-time">${new Date(item.timestamp).toLocaleString()}</span>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Failed to load history:', error);
+            }
+        }
+
+        // Load history on page load
+        loadHistory();
+    </script>
+</body>
+</html>
