@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Main Lobby - Home{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Welcome to Main Lobby</h1>
+    <p>Your conglomerate for music, videos, and podcasts</p>
+    {% if not current_user.is_authenticated %}
+        <div>
+            <a href="/auth/register" class="btn-primary" style="margin: 0 0.5rem;">Get Started Free</a>
+            <a href="/pricing" class="btn-secondary" style="margin: 0 0.5rem;">View Plans</a>
+        </div>
+    {% else %}
+        <p>Current tier: <span class="tier-badge tier-{{ current_user.subscription_tier }}">{{ current_user.subscription_tier }}</span></p>
+        {% if current_user.subscription_tier == 'free' %}
+            <a href="/pricing" class="btn-primary" style="margin-top: 1rem; display: inline-block;">Upgrade Now</a>
+        {% endif %}
+    {% endif %}
+</div>
+
+<section>
+    <h2 class="section-heading">New Releases</h2>
+    {% if new_releases %}
+        <div class="content-grid">
+            {% for content in new_releases %}
+                <div class="content-card" onclick="window.location.href='/content/{{ content.id }}'">
+                    <div class="content-thumbnail">
+                        {% if content.content_type == 'music' %}🎵
+                        {% elif content.content_type == 'video' %}🎬
+                        {% elif content.content_type == 'podcast' %}🎙️
+                        {% endif %}
+                    </div>
+                    <h3>{{ content.title }}</h3>
+                    <p>{{ content.artist or 'Unknown Artist' }}</p>
+                    <div class="content-meta">
+                        <span class="meta-badge tier-{{ content.tier_required }}">{{ content.tier_required }}</span>
+                        {% if content.is_exclusive %}
+                            <span class="meta-badge">⭐ Exclusive</span>
+                        {% endif %}
+                        {% if content.is_downloadable %}
+                            <span class="meta-badge">⬇️ Download</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="color: var(--text-secondary); text-align: center; padding: 3rem;">No new releases yet. Check back soon!</p>
+    {% endif %}
+</section>
+
+<section style="margin-top: 4rem;">
+    <h2 class="section-heading">Subscription Tiers</h2>
+    <div class="pricing-container">
+        <div class="pricing-card">
+            <h3>Free Tier</h3>
+            <div class="pricing-price">$0<span>/month</span></div>
+            <ul class="pricing-features">
+                <li>Access to new releases</li>
+                <li>Stream music</li>
+                <li>Basic quality audio</li>
+            </ul>
+            {% if current_user.is_authenticated and current_user.subscription_tier == 'free' %}
+                <p style="color: var(--accent-primary);">Your current plan</p>
+            {% else %}
+                <a href="/auth/register" class="btn-secondary">Sign Up Free</a>
+            {% endif %}
+        </div>
+
+        <div class="pricing-card featured">
+            <h3>Tier 1</h3>
+            <div class="pricing-price">$1-5<span>/month</span></div>
+            <ul class="pricing-features">
+                <li>Everything in Free</li>
+                <li>Exclusive drops</li>
+                <li>Downloadable content</li>
+                <li>High quality audio</li>
+            </ul>
+            {% if current_user.is_authenticated and current_user.subscription_tier == 'tier1' %}
+                <p style="color: var(--accent-primary);">Your current plan</p>
+            {% else %}
+                <a href="/pricing" class="btn-primary">Upgrade to Tier 1</a>
+            {% endif %}
+        </div>
+
+        <div class="pricing-card">
+            <h3>Tier 2</h3>
+            <div class="pricing-price">$10-15<span>/month</span></div>
+            <ul class="pricing-features">
+                <li>Everything in Tier 1</li>
+                <li>Music videos</li>
+                <li>Podcasts</li>
+                <li>Early access</li>
+                <li>Lossless audio</li>
+            </ul>
+            {% if current_user.is_authenticated and current_user.subscription_tier == 'tier2' %}
+                <p style="color: var(--accent-primary);">Your current plan</p>
+            {% else %}
+                <a href="/pricing" class="btn-primary">Upgrade to Tier 2</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

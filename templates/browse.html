@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Browse - Main Lobby{% endblock %}
+
+{% block content %}
+<h1>Browse Content</h1>
+
+<div style="margin: 2rem 0; display: flex; gap: 1rem; flex-wrap: wrap;">
+    <a href="/browse?type=all" class="btn-secondary {% if content_type == 'all' %}btn-primary{% endif %}">All</a>
+    <a href="/browse?type=music" class="btn-secondary {% if content_type == 'music' %}btn-primary{% endif %}">Music</a>
+    <a href="/browse?type=video" class="btn-secondary {% if content_type == 'video' %}btn-primary{% endif %}">Videos</a>
+    <a href="/browse?type=podcast" class="btn-secondary {% if content_type == 'podcast' %}btn-primary{% endif %}">Podcasts</a>
+</div>
+
+{% if content %}
+    <div class="content-grid">
+        {% for item in content %}
+            <div class="content-card" onclick="window.location.href='/content/{{ item.id }}'">
+                <div class="content-thumbnail">
+                    {% if item.content_type == 'music' %}🎵
+                    {% elif item.content_type == 'video' %}🎬
+                    {% elif item.content_type == 'podcast' %}🎙️
+                    {% endif %}
+                </div>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.artist or 'Unknown Artist' }}</p>
+                <div class="content-meta">
+                    <span class="meta-badge tier-{{ item.tier_required }}">{{ item.tier_required }}</span>
+                    {% if item.is_new_release %}
+                        <span class="meta-badge">🆕 New</span>
+                    {% endif %}
+                    {% if item.is_exclusive %}
+                        <span class="meta-badge">⭐ Exclusive</span>
+                    {% endif %}
+                    {% if item.is_downloadable %}
+                        <span class="meta-badge">⬇️ Download</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p style="color: var(--text-secondary); text-align: center; padding: 3rem;">No content found. Check back soon!</p>
+{% endif %}
+{% endblock %}

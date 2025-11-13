@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Content - Admin{% endblock %}
+
+{% block content %}
+<div class="form-container" style="max-width: 600px;">
+    <h2>Upload Content</h2>
+    <form id="upload-form" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" required>
+        </div>
+
+        <div class="form-group">
+            <label for="artist">Artist/Creator</label>
+            <input type="text" id="artist" name="artist">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="content_type">Content Type</label>
+            <select id="content_type" name="content_type" required>
+                <option value="music">Music</option>
+                <option value="video">Video</option>
+                <option value="podcast">Podcast</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="tier_required">Tier Required</label>
+            <select id="tier_required" name="tier_required" required>
+                <option value="free">Free</option>
+                <option value="tier1">Tier 1</option>
+                <option value="tier2">Tier 2</option>
+            </select>
+        </div>
+
+        <div class="form-group" style="display: flex; gap: 2rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" name="is_new_release" style="width: auto;">
+                New Release
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" name="is_exclusive" style="width: auto;">
+                Exclusive
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" name="is_downloadable" style="width: auto;">
+                Downloadable
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label for="file">File</label>
+            <input type="file" id="file" name="file" required accept="audio/*,video/*">
+        </div>
+
+        <div class="form-group">
+            <button type="submit">Upload Content</button>
+        </div>
+
+        <div id="upload-progress" style="display: none; margin-top: 1rem;">
+            <div style="background: var(--bg-tertiary); height: 8px; border-radius: 4px; overflow: hidden;">
+                <div id="progress-bar" style="background: var(--accent-primary); height: 100%; width: 0%; transition: width 0.3s;"></div>
+            </div>
+            <p id="progress-text" style="text-align: center; margin-top: 0.5rem; color: var(--text-secondary);"></p>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('upload-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    const progressDiv = document.getElementById('upload-progress');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+
+    progressDiv.style.display = 'block';
+    progressText.textContent = 'Uploading...';
+
+    try {
+        const response = await fetch('/admin/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            progressBar.style.width = '100%';
+            progressText.textContent = 'Upload complete!';
+            alert(data.message);
+            e.target.reset();
+            setTimeout(() => {
+                progressDiv.style.display = 'none';
+                progressBar.style.width = '0%';
+            }, 2000);
+        } else {
+            alert(data.error || 'Upload failed');
+            progressDiv.style.display = 'none';
+        }
+    } catch (error) {
+        alert('Error uploading file');
+        console.error(error);
+        progressDiv.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

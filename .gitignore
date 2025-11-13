@@ -17,6 +17,16 @@ output/
 *.mp3
 *.flac
 *.ogg
+*.mp4
+*.mov
+
+# Database
+*.db
+*.sqlite
+instance/
+
+# Uploads
+uploads/
 
 # OS metadata
 .DS_Store

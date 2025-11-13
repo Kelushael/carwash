@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}{{ content.title }} - Main Lobby{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    <div style="display: grid; grid-template-columns: 300px 1fr; gap: 2rem; margin-bottom: 2rem;">
+        <div>
+            <div class="content-thumbnail" style="width: 100%; height: 300px; font-size: 5rem;">
+                {% if content.content_type == 'music' %}🎵
+                {% elif content.content_type == 'video' %}🎬
+                {% elif content.content_type == 'podcast' %}🎙️
+                {% endif %}
+            </div>
+        </div>
+
+        <div>
+            <h1>{{ content.title }}</h1>
+            {% if content.artist %}
+                <p style="font-size: 1.25rem; color: var(--text-secondary); margin-bottom: 1rem;">{{ content.artist }}</p>
+            {% endif %}
+
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                <span class="tier-badge tier-{{ content.tier_required }}">{{ content.tier_required }}</span>
+                {% if content.is_new_release %}
+                    <span class="meta-badge">🆕 New Release</span>
+                {% endif %}
+                {% if content.is_exclusive %}
+                    <span class="meta-badge">⭐ Exclusive</span>
+                {% endif %}
+                {% if content.is_downloadable %}
+                    <span class="meta-badge">⬇️ Downloadable</span>
+                {% endif %}
+                <span class="meta-badge">{{ content.content_type|title }}</span>
+            </div>
+
+            {% if content.description %}
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">{{ content.description }}</p>
+            {% endif %}
+
+            {% if has_access %}
+                <div style="margin-bottom: 1rem;">
+                    {% if content.content_type == 'music' or content.content_type == 'podcast' %}
+                        <audio controls style="width: 100%;">
+                            <source src="/stream/{{ content.id }}" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+                    {% elif content.content_type == 'video' %}
+                        <video controls style="width: 100%; max-height: 400px; background: black;">
+                            <source src="/stream/{{ content.id }}" type="video/mp4">
+                            Your browser does not support the video element.
+                        </video>
+                    {% endif %}
+                </div>
+
+                {% if content.is_downloadable and current_user.is_authenticated and current_user.has_access_to_tier('tier1') %}
+                    <a href="/download/{{ content.id }}" class="btn-primary" style="display: inline-block; margin-top: 1rem;">
+                        ⬇️ Download
+                    </a>
+                {% endif %}
+            {% else %}
+                <div style="background: var(--bg-tertiary); padding: 2rem; border-radius: 8px; text-align: center;">
+                    <h3>🔒 Subscription Required</h3>
+                    <p style="color: var(--text-secondary); margin: 1rem 0;">
+                        This content requires <span class="tier-badge tier-{{ content.tier_required }}">{{ content.tier_required }}</span> subscription.
+                    </p>
+                    <a href="/pricing" class="btn-primary">View Plans</a>
+                </div>
+            {% endif %}
+
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--bg-tertiary);">
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                    Released: {{ content.release_date.strftime('%B %d, %Y') }}
+                </p>
+                {% if content.duration_seconds %}
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                        Duration: {{ content.duration_seconds // 60 }}:{{ '%02d' % (content.duration_seconds % 60) }}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

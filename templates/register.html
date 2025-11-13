@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - Main Lobby{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Join Main Lobby</h2>
+    <form method="POST" action="/auth/register">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required autocomplete="email">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required autocomplete="new-password" minlength="6">
+        </div>
+        <div class="form-group">
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password" minlength="6">
+        </div>
+        <div class="form-group">
+            <button type="submit">Sign Up</button>
+        </div>
+    </form>
+    <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary);">
+        Already have an account? <a href="/auth/login" style="color: var(--accent-primary);">Log in</a>
+    </p>
+</div>
+{% endblock %}

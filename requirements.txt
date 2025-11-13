@@ -1,6 +1,10 @@
 Flask
+Flask-SQLAlchemy
+Flask-Login
 click
 pydub
 librosa
 pyloudnorm
 openai
+stripe
+Werkzeug
